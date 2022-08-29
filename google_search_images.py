@@ -92,6 +92,7 @@ class GoogleSearchImagesAPI(Browser):
         self.attempt = 1
 
     def find_img(self, parameter):
+        print(parameter)
         self.search = parameter
         data = {
             "q": self.search,
@@ -168,12 +169,13 @@ class GoogleSearchImagesAPI(Browser):
                     file.write(chunk)
             return self.img_path
 
-    def search_image_by_name(self, object_data, base_dir):
+    def search_image_by_name(self, object_data, base_dir, extra_name=None):
         if not check_existence(base_dir, object_data["code"]):
+            phrase = object_data.get("description") or object_data.get("name")
             print(
-                f'\n{index} --> BUSCAR POR: {object_data.get("description") or object_data.get("name")} CÓDIGO: {object_data["code"]}')
+                f'\n{index} --> BUSCAR POR: {phrase} CÓDIGO: {object_data["code"]}')
             self.attempts = 3
-            url = self.find_img(object_data.get("description") or object_data.get("name"))
+            url = self.find_img(f'{extra_name + " " + phrase if extra_name else phrase}')
             if url:
                 print("URL: ", url)
                 self.download_img(url, object_data["code"], base_dir)
@@ -197,6 +199,6 @@ if __name__ == '__main__':
         gsia.search_image_by_name(item, "grupos")
         for sub_item in item["products"]:
             index += 1
-            gsia.search_image_by_name(sub_item, "produtos")
+            gsia.search_image_by_name(sub_item, "produtos", item.get("name"))
     print(f'\rITEMS JÁ ESTÃO SALVOS.', end="")
-    start_upgrade(filename)
+    start_upgrade(filename, None)
